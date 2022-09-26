@@ -36,24 +36,24 @@ func TestGetStreams(t *testing.T) {
 	})
 }
 
-/*
 func TestGetOneStreamInfo(t *testing.T) {
 
-	fakeCh := make(chan domain.Service, fake.FakeAmount)
+	fakeCh := make(chan domain.Service, 1)
 
-	for i := 0; i < fake.FakeAmount; i++ {
-		s := service.New(fake.FakeDataList[i])
-		fakeCh <- s
-	}
+	s := service.New(fake.FakeData1)
+	fakeCh <- s
 
+	//ch := <-fakeCh
 	r := gin.Default()
-	h := handler.New(fakeCh, fake.FakeAmount)
+	h := handler.New(fakeCh, 1)
 	h.Route(r)
 
 	t.Run("should return http 200 code", func(t *testing.T) {
 		w := httptest.NewRecorder()
-		req, _ := http.NewRequest(http.MethodGet, "/api/v1/streamInfo/:stream", nil)
+		req, _ := http.NewRequest(http.MethodGet, "/api/v1/streamInfo/fake-data-1", nil)
+		r.ServeHTTP(w, req)
 
+		assert.Equal(t, http.StatusOK, w.Code)
+		//assert.Equal(t, fmt.Sprintf("{\"info\":%v}", ch.GetData()), w.Body.String())
 	})
 }
-*/
