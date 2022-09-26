@@ -4,6 +4,7 @@ import (
 	"chanLoader/pkg/domain"
 	"chanLoader/pkg/handler"
 	"chanLoader/pkg/service"
+	"chanLoader/pkg/storage/fake"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -13,20 +14,16 @@ import (
 )
 
 func TestGetStreams(t *testing.T) {
-	fakeData := domain.Info{
-		Name: "data-1",
-		Data: []int{1, 2, 3},
-	}
-	fakeAmount := 2
-	fakeCh := make(chan domain.Service, fakeAmount)
+
+	fakeCh := make(chan domain.Service, fake.FakeAmount)
 	r := gin.Default()
 
-	for i := 0; i < fakeAmount; i++ {
-		s := service.New(fakeData)
+	for i := 0; i < fake.FakeAmount; i++ {
+		s := service.New(fake.FakeDataList[i])
 		fakeCh <- s
 	}
 
-	h := handler.New(fakeCh, fakeAmount)
+	h := handler.New(fakeCh, fake.FakeAmount)
 	h.Route(r)
 
 	t.Run("should return http 200 code", func(t *testing.T) {
@@ -35,5 +32,28 @@ func TestGetStreams(t *testing.T) {
 		r.ServeHTTP(w, req)
 
 		assert.Equal(t, http.StatusOK, w.Code)
+		assert.Equal(t, `{"data_list":[[1,2,3],[11,22,33]],"name_list":["fake-data-1","fake-data-2"]}`, w.Body.String())
 	})
 }
+
+/*
+func TestGetOneStreamInfo(t *testing.T) {
+
+	fakeCh := make(chan domain.Service, fake.FakeAmount)
+
+	for i := 0; i < fake.FakeAmount; i++ {
+		s := service.New(fake.FakeDataList[i])
+		fakeCh <- s
+	}
+
+	r := gin.Default()
+	h := handler.New(fakeCh, fake.FakeAmount)
+	h.Route(r)
+
+	t.Run("should return http 200 code", func(t *testing.T) {
+		w := httptest.NewRecorder()
+		req, _ := http.NewRequest(http.MethodGet, "/api/v1/streamInfo/:stream", nil)
+
+	})
+}
+*/
